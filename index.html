@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bayani Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #F4A800;
+    --gold-light: #FFD166;
+    --gold-dark: #C17D00;
+    --red: #C0392B;
+    --red-dark: #922B21;
+    --bg-dark: #1A0A00;
+    --bg-mid: #2C1A0A;
+    --bg-card: #3D2410;
+    --bg-card2: #4A2E18;
+    --text: #F5E6C8;
+    --text-muted: #B89A72;
+    --text-dim: #7A6245;
+    --green: #27AE60;
+    --green-dark: #1E8449;
+    --blue: #2471A3;
+    --blue-light: #5DADE2;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── BACKGROUND TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(244,168,0,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(192,57,43,0.08) 0%, transparent 50%),
+      repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(244,168,0,0.015) 40px, rgba(244,168,0,0.015) 41px);
+    pointer-events: none;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: relative; z-index: 10;
+    background: linear-gradient(135deg, var(--bg-mid) 0%, var(--bg-card) 100%);
+    border-bottom: 2px solid rgba(244,168,0,0.3);
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+  }
+
+  .topbar-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px; font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-shadow: 0 0 20px rgba(244,168,0,0.4);
+  }
+
+  .topbar-xp {
+    background: rgba(244,168,0,0.15);
+    border: 1px solid rgba(244,168,0,0.4);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 14px; font-weight: 700;
+    color: var(--gold-light);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .topbar-xp::before { content: '⚡'; font-size: 14px; }
+
+  /* ── CONTENT AREA ── */
+  .content {
+    position: relative; z-index: 1;
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    padding-bottom: 90px;
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottomnav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: linear-gradient(180deg, var(--bg-mid) 0%, var(--bg-dark) 100%);
+    border-top: 2px solid rgba(244,168,0,0.25);
+    display: flex;
+    padding: 8px 0 12px;
+  }
+
+  .nav-btn {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px 4px;
+    border: none; background: none; cursor: pointer;
+    color: var(--text-dim);
+    font-family: 'Nunito', sans-serif;
+    font-size: 10px; font-weight: 700;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .nav-btn .nav-icon { font-size: 20px; }
+  .nav-btn.active { color: var(--gold); }
+  .nav-btn:hover { color: var(--gold-light); }
+
+  /* ── CARDS ── */
+  .card {
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card2) 100%);
+    border: 1px solid rgba(244,168,0,0.2);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-gold {
+    border-color: rgba(244,168,0,0.5);
+    background: linear-gradient(135deg, rgba(244,168,0,0.12) 0%, var(--bg-card) 100%);
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 24px;
+    border: none; border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    color: var(--bg-dark);
+    box-shadow: 0 4px 14px rgba(244,168,0,0.4);
+  }
+
+  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(244,168,0,0.5); }
+  .btn-gold:active { transform: translateY(0); }
+
+  .btn-outline {
+    background: transparent;
+    border: 2px solid rgba(244,168,0,0.4);
+    color: var(--gold-light);
+  }
+
+  .btn-outline:hover { border-color: var(--gold); background: rgba(244,168,0,0.1); }
+
+  .btn-green {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(39,174,96,0.4);
+  }
+
+  .btn-red {
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+    color: #fff;
+  }
+
+  .btn-full { width: 100%; }
+  .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+  /* ── INPUTS ── */
+  .input-group { margin-bottom: 16px; }
+  .input-group label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: var(--text-muted); margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+
+  .input-field {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(244,168,0,0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .input-field:focus { border-color: var(--gold); }
+  .input-field::placeholder { color: var(--text-dim); }
+
+  .checkbox-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 10px;
+    font-size: 13px; color: var(--text-muted); cursor: pointer;
+  }
+
+  .checkbox-row input { width: 16px; height: 16px; accent-color: var(--gold); }
+
+  /* ── SECTION HEADINGS ── */
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(244,168,0,0.4) 0%, transparent 100%);
+  }
+
+  /* ── QUARTER TABS ── */
+  .quarter-tabs {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 20px;
+  }
+
+  .quarter-tab {
+    padding: 10px 8px;
+    border: 1px solid rgba(244,168,0,0.25);
+    border-radius: var(--radius-sm);
+    background: rgba(0,0,0,0.2);
+    color: var(--text-muted);
+    font-size: 11px; font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .quarter-tab.active {
+    background: rgba(244,168,0,0.15);
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+
+  /* ── MISSION GRID ── */
+  .mission-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .mission-tile {
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px;
+    border: 2px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    padding: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mission-tile.completed {
+    background: rgba(39,174,96,0.15);
+    border-color: var(--green);
+  }
+
+  .mission-tile.available {
+    background: rgba(244,168,0,0.1);
+    border-color: var(--gold);
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { border-color: var(--gold); box-shadow: 0 0 0 0 rgba(244,168,0,0.3); }
+    50% { border-color: var(--gold-light); box-shadow: 0 0 0 4px rgba(244,168,0,0.1); }
+  }
+
+  .mission-tile.locked {
+    background: rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.1);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .mission-tile:hover:not(.locked) { transform: scale(1.04); }
+
+  .mission-num {
+    font-family: 'Cinzel', serif;
+    font-size: 18px; font-weight: 900;
+    color: var(--gold);
+  }
+
+  .mission-tile.completed .mission-num { color: var(--green); }
+  .mission-tile.locked .mission-num { color: var(--text-dim); }
+
+  .mission-type-tag {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  .mission-tile.completed .mission-type-tag { color: #6ECB90; }
+  .mission-tile.available .mission-type-tag { color: var(--gold-light); }
+
+  .lock-icon { font-size: 18px; }
+
+  /* ── XP BAR ── */
+  .xp-bar-wrap {
+    background: rgba(0,0,0,0.3);
+    border-radius: 20px; height: 10px;
+    overflow: hidden; margin: 8px 0;
+  }
+
+  .xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+    border-radius: 20px;
+    transition: width 0.6s ease;
+  }
+
+  /* ── BADGES ── */
+  .badge-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .badge {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    width: 70px;
+  }
+
+  .badge-icon {
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    border: 2px solid;
+  }
+
+  .badge-icon.earned {
+    background: linear-gradient(135deg, rgba(244,168,0,0.2), rgba(244,168,0,0.05));
+    border-color: var(--gold);
+    box-shadow: 0 0 16px rgba(244,168,0,0.3);
+  }
+
+  .badge-icon.locked {
+    background: rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.1);
+    filter: grayscale(1);
+    opacity: 0.4;
+  }
+
+  .badge-name {
+    font-size: 9px; font-weight: 700;
+    text-align: center; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+
+  /* ── DAILY MISSION ── */
+  .daily-card {
+    background: linear-gradient(135deg, rgba(36,113,163,0.2) 0%, rgba(93,173,226,0.08) 100%);
+    border: 1px solid rgba(93,173,226,0.4);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .daily-label {
+    font-size: 10px; font-weight: 700;
+    color: var(--blue-light);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  /* ── MISSION SCREEN ── */
+  .mission-header {
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-mid) 100%);
+    border-bottom: 2px solid rgba(244,168,0,0.2);
+    padding: 16px 20px;
+    position: relative; z-index: 10;
+  }
+
+  .mission-tag {
+    display: inline-block;
+    background: rgba(244,168,0,0.15);
+    border: 1px solid rgba(244,168,0,0.4);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px; font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .mission-title-big {
+    font-family: 'Cinzel', serif;
+    font-size: 17px; font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .scenario-box {
+    background: rgba(0,0,0,0.25);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 14px 16px;
+    font-size: 14px; line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .question-label {
+    font-size: 12px; font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  .journal-textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(244,168,0,0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; line-height: 1.6;
+    resize: vertical; min-height: 100px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 14px;
+  }
+
+  .journal-textarea:focus { border-color: var(--gold); }
+
+  /* ── SORT CARDS (Evidence Board) ── */
+  .sort-columns {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 16px;
+  }
+
+  .sort-col {
+    background: rgba(0,0,0,0.2);
+    border: 2px dashed rgba(244,168,0,0.3);
+    border-radius: var(--radius-sm);
+    padding: 10px; min-height: 120px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .sort-col.drag-over {
+    border-color: var(--gold);
+    background: rgba(244,168,0,0.08);
+  }
+
+  .sort-col-label {
+    font-size: 11px; font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 8px; text-align: center;
+  }
+
+  .sort-card-item {
+    background: var(--bg-card2);
+    border: 1px solid rgba(244,168,0,0.25);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    margin-bottom: 6px;
+    cursor: grab;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .sort-card-item:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .sort-card-item:active { cursor: grabbing; opacity: 0.7; }
+
+  .sort-bank {
+    background: rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    min-height: 60px;
+    margin-bottom: 14px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    align-items: flex-start;
+  }
+
+  /* ── TIMELINE DROP ── */
+  .timeline-slots {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .timeline-slot {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .timeline-num {
+    font-family: 'Cinzel', serif;
+    font-size: 14px; font-weight: 700;
+    color: var(--gold);
+    width: 24px; flex-shrink: 0; text-align: center;
+  }
+
+  .timeline-drop-zone {
+    flex: 1;
+    background: rgba(0,0,0,0.2);
+    border: 2px dashed rgba(244,168,0,0.3);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    min-height: 42px;
+    font-size: 13px; color: var(--text-dim);
+    transition: all 0.2s;
+    display: flex; align-items: center;
+  }
+
+  .timeline-drop-zone.drag-over {
+    border-color: var(--gold);
+    background: rgba(244,168,0,0.08);
+  }
+
+  .timeline-drop-zone.filled {
+    border-color: var(--green);
+    color: var(--text);
+    background: rgba(39,174,96,0.08);
+  }
+
+  /* ── CONNECT DOTS ── */
+  .connect-pairs { display: flex; gap: 10px; margin-bottom: 16px; }
+
+  .connect-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+  .connect-item {
+    background: var(--bg-card2);
+    border: 2px solid rgba(244,168,0,0.25);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .connect-item:hover { border-color: var(--gold); }
+  .connect-item.selected { border-color: var(--gold); background: rgba(244,168,0,0.15); }
+  .connect-item.matched { border-color: var(--green); background: rgba(39,174,96,0.1); color: #6ECB90; }
+
+  /* ── SUCCESS OVERLAY ── */
+  .success-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.8);
+    align-items: center; justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .success-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .success-card {
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-mid) 100%);
+    border: 2px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    text-align: center;
+    max-width: 320px; width: 90%;
+    box-shadow: 0 0 40px rgba(244,168,0,0.3);
+  }
+
+  .success-emoji { font-size: 56px; margin-bottom: 12px; }
+
+  .success-title {
+    font-family: 'Cinzel', serif;
+    font-size: 22px; font-weight: 900;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .success-xp {
+    font-size: 32px; font-weight: 800;
+    color: var(--gold-light);
+    margin: 12px 0;
+  }
+
+  /* ── TEACHER BOARD ── */
+  .teacher-header {
+    background: linear-gradient(135deg, #0D1B2A 0%, #1A3A5C 100%);
+    border-bottom: 2px solid rgba(93,173,226,0.3);
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .teacher-title {
+    font-family: 'Cinzel', serif;
+    font-size: 18px; font-weight: 700;
+    color: var(--blue-light);
+  }
+
+  .teacher-content {
+    background: #0D1B2A;
+    flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 20px;
+  }
+
+  .student-row {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(93,173,226,0.15);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .student-row:hover { background: rgba(93,173,226,0.08); }
+
+  .student-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: #fff;
+    flex-shrink: 0;
+  }
+
+  .student-info { flex: 1; }
+  .student-name { font-size: 14px; font-weight: 700; color: #E8F4FD; }
+  .student-meta { font-size: 12px; color: #5D9EC4; margin-top: 2px; }
+
+  .progress-mini {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px; height: 6px; width: 80px;
+    overflow: hidden;
+  }
+
+  .progress-mini-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--blue-light));
+    border-radius: 10px;
+  }
+
+  .stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(93,173,226,0.2);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Cinzel', serif;
+    font-size: 28px; font-weight: 900;
+    color: var(--blue-light);
+  }
+
+  .stat-label {
+    font-size: 11px; font-weight: 700;
+    color: #5D9EC4;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .code-box {
+    background: rgba(0,0,0,0.4);
+    border: 2px solid rgba(93,173,226,0.4);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .class-code {
+    font-family: 'Cinzel', serif;
+    font-size: 36px; font-weight: 900;
+    color: var(--blue-light);
+    letter-spacing: 8px;
+    text-shadow: 0 0 20px rgba(93,173,226,0.5);
+  }
+
+  .code-label {
+    font-size: 11px; font-weight: 700;
+    color: #5D9EC4;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  /* ── JOURNAL VIEW ── */
+  .journal-entry {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(244,168,0,0.15);
+    border-left: 3px solid var(--gold-dark);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .journal-entry-title {
+    font-size: 13px; font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .journal-entry-text {
+    font-size: 13px; line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .journal-entry-meta {
+    font-size: 11px; color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  /* ── PROFILE ── */
+  .profile-hero {
+    text-align: center; padding: 20px 0 10px;
+    margin-bottom: 8px;
+  }
+
+  .profile-avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 28px; font-weight: 900;
+    color: var(--bg-dark);
+    margin: 0 auto 12px;
+    border: 3px solid rgba(244,168,0,0.5);
+    box-shadow: 0 0 24px rgba(244,168,0,0.3);
+  }
+
+  .profile-name {
+    font-family: 'Cinzel', serif;
+    font-size: 20px; font-weight: 700;
+    color: var(--text);
+  }
+
+  .profile-sub {
+    font-size: 13px; color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── MAP SCREEN ── */
+  .map-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .map-item {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(244,168,0,0.15);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .map-item:hover { background: rgba(244,168,0,0.06); }
+
+  .map-item-num {
+    font-family: 'Cinzel', serif;
+    font-size: 16px; font-weight: 700;
+    color: var(--gold);
+    width: 28px; text-align: center; flex-shrink: 0;
+  }
+
+  .map-item-info { flex: 1; }
+  .map-item-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .map-item-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .map-item-status {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px;
+  }
+
+  .map-item-status.done { background: rgba(39,174,96,0.15); color: var(--green); }
+  .map-item-status.open { background: rgba(244,168,0,0.15); color: var(--gold); }
+  .map-item-status.lock { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+
+  /* ── SETTINGS ── */
+  .settings-item {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(244,168,0,0.1);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 14px; font-weight: 600;
+  }
+
+  .settings-item:hover { background: rgba(244,168,0,0.05); }
+  .settings-item .s-icon { font-size: 18px; width: 24px; text-align: center; }
+  .settings-item.danger { color: #E74C3C; border-color: rgba(231,76,60,0.2); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--gold);
+    border-radius: 24px;
+    padding: 10px 20px;
+    font-size: 13px; font-weight: 700;
+    color: var(--gold-light);
+    z-index: 300;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; }
+
+  /* ── LOGIN SCREEN ── */
+  #screen-login {
+    background: linear-gradient(160deg, #1A0A00 0%, #2C1400 50%, #1A0A00 100%);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+
+  .login-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 36px; font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    text-shadow: 0 0 30px rgba(244,168,0,0.5);
+    margin-bottom: 4px;
+  }
+
+  .login-sub {
+    font-size: 13px; color: var(--text-muted);
+    text-align: center; margin-bottom: 32px;
+    font-style: italic;
+  }
+
+  .login-box {
+    width: 100%; max-width: 360px;
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-mid) 100%);
+    border: 1px solid rgba(244,168,0,0.3);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .role-tabs {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 24px;
+  }
+
+  .role-tab {
+    padding: 10px;
+    border: 2px solid rgba(244,168,0,0.25);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; text-align: center;
+    transition: all 0.2s;
+  }
+
+  .role-tab.active {
+    background: rgba(244,168,0,0.15);
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+
+  /* ── STUDENT JOURNAL IN TEACHER ── */
+  .student-journal-header {
+    background: rgba(93,173,226,0.1);
+    border: 1px solid rgba(93,173,226,0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 14px; font-weight: 700;
+    color: var(--blue-light);
+  }
+
+  /* ── MISC ── */
+  .divider {
+    height: 1px;
+    background: rgba(244,168,0,0.15);
+    margin: 16px 0;
+  }
+
+  .pill {
+    display: inline-block;
+    background: rgba(244,168,0,0.12);
+    border: 1px solid rgba(244,168,0,0.3);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px; font-weight: 700;
+    color: var(--gold-light);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .text-muted { color: var(--text-muted); }
+  .text-sm { font-size: 13px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mb-8 { margin-bottom: 8px; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .gap-8 { gap: 8px; }
+
+  .back-btn {
+    background: none; border: none; color: var(--text-muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  .back-btn:hover { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     SCREEN: LOGIN
+════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-logo">⚔ BAYANI QUEST</div>
+  <p class="login-sub">Ikaw ang Tagasaliksik ng iyong komunidad</p>
+
+  <div class="login-box">
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="setRole('student')">🎒 Estudyante</button>
+      <button class="role-tab" onclick="setRole('teacher')">📋 Guro</button>
+    </div>
+
+    <!-- Student Login -->
+    <div id="student-login">
+      <div class="input-group">
+        <label>Iyong Pangalan</label>
+        <input type="text" class="input-field" id="student-name" placeholder="Hal. Juan dela Cruz">
+      </div>
+      <div class="input-group">
+        <label>Class Code (opsyonal)</label>
+        <input type="text" class="input-field" id="class-code" placeholder="Hal. BQ-2025" id="class-code-input">
+      </div>
+      <label class="checkbox-row">
+        <input type="checkbox" id="no-code-check" onchange="toggleClassCode(this)">
+        Pumasok nang walang code
+      </label>
+      <div style="margin-top: 20px;">
+        <button class="btn btn-gold btn-full" onclick="loginStudent()">Pumasok bilang Estudyante →</button>
+      </div>
+    </div>
+
+    <!-- Teacher Login -->
+    <div id="teacher-login" style="display:none;">
+      <div class="input-group">
+        <label>Pangalan ng Guro</label>
+        <input type="text" class="input-field" id="teacher-name" placeholder="Hal. G. Santos">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" class="input-field" id="teacher-pass" placeholder="••••••••">
+      </div>
+      <div style="margin-top: 20px;">
+        <button class="btn btn-full" style="background:linear-gradient(135deg,#2471A3,#1A5276);color:#fff;font-family:Nunito,sans-serif;font-size:15px;font-weight:800;border:none;border-radius:8px;padding:12px;cursor:pointer;" onclick="loginTeacher()">Pumasok bilang Guro →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SCREEN: STUDENT DASHBOARD
+════════════════════════════════════ -->
+<div id="screen-student" class="screen">
+  <div class="topbar">
+    <div class="topbar-title">⚔ BAYANI QUEST</div>
+    <div class="topbar-xp" id="xp-display">50 XP</div>
+  </div>
+
+  <!-- HOME TAB -->
+  <div id="tab-home" class="content">
+    <div class="card card-gold" style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">ARALING PANLIPUNAN — GRADE 8</div>
+      <div style="font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;">Ikaw ang Tagasaliksik</div>
+      <div style="font-size:13px;color:var(--text-muted);">Tuklasin ang kasaysayan, heograpiya, at lipunan sa pamamagitan ng tunay na mission.</div>
+    </div>
+
+    <div class="daily-card">
+      <div class="daily-label">📅 Daily Mission</div>
+      <div style="font-size:14px;font-weight:700;color:#E8F4FD;margin-bottom:8px;">Suriin: Ang Kalakalan sa Sinaunang Asya</div>
+      <div style="font-size:12px;color:#5D9EC4;margin-bottom:12px;">+30 XP bonus kung matatapos ngayon</div>
+      <button class="btn btn-sm" style="background:rgba(93,173,226,0.2);border:1px solid rgba(93,173,226,0.5);color:var(--blue-light);font-family:Nunito,sans-serif;font-size:12px;font-weight:800;border-radius:6px;padding:7px 14px;cursor:pointer;" onclick="openMission(2,'Q1')">Simulan →</button>
+    </div>
+
+    <div class="section-title">Pumili ng Quarter</div>
+
+    <div class="quarter-tabs">
+      <div class="quarter-tab active" onclick="selectQuarter('Q1',this)">Q1: Heograpiya at Sinaunang Kabihasnan</div>
+      <div class="quarter-tab" onclick="selectQuarter('Q2',this)">Q2: Klasiko at Transisyonal</div>
+      <div class="quarter-tab" onclick="selectQuarter('Q3',this)">Q3: Makabagong Daigdig</div>
+      <div class="quarter-tab" onclick="selectQuarter('Q4',this)">Q4: Kontemporanyong Daigdig</div>
+    </div>
+
+    <div class="section-title" id="mission-quarter-label">Q1 — Mga Mission</div>
+    <div class="mission-grid" id="mission-grid"></div>
+  </div>
+
+  <!-- MAP TAB -->
+  <div id="tab-map" class="content" style="display:none;">
+    <div class="section-title">Mapa ng Lahat ng Mission</div>
+    <div class="map-list" id="map-list"></div>
+  </div>
+
+  <!-- JOURNAL TAB -->
+  <div id="tab-journal" class="content" style="display:none;">
+    <div class="section-title">Aking Journal</div>
+    <div id="journal-list">
+      <div style="text-align:center;padding:40px 20px;color:var(--text-dim);">
+        <div style="font-size:32px;margin-bottom:12px;">📖</div>
+        <div>Wala pang naka-save na entry. Kumpletuhin ang isang mission!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div id="tab-profile" class="content" style="display:none;">
+    <div class="profile-hero">
+      <div class="profile-avatar" id="profile-initial">J</div>
+      <div class="profile-name" id="profile-name-display">Juan dela Cruz</div>
+      <div class="profile-sub" id="profile-class-display">Grade 8 · Walang Code</div>
+    </div>
+
+    <div class="card">
+      <div class="flex items-center justify-between mb-8">
+        <div style="font-size:13px;font-weight:700;color:var(--text-muted);">Kabuuang XP</div>
+        <div style="font-family:'Cinzel',serif;font-size:20px;font-weight:900;color:var(--gold);" id="profile-xp">50 XP</div>
+      </div>
+      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="profile-xp-bar" style="width:2%"></div></div>
+      <div class="flex justify-between mt-8" style="font-size:11px;color:var(--text-dim);">
+        <span>0 XP</span><span>2500 XP</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="flex justify-between" style="gap:8px;">
+        <div style="text-align:center;flex:1;">
+          <div style="font-family:'Cinzel',serif;font-size:22px;font-weight:900;color:var(--gold);" id="missions-count">1</div>
+          <div style="font-size:11px;color:var(--text-muted);">Missions Tapos</div>
+        </div>
+        <div style="width:1px;background:rgba(244,168,0,0.15);"></div>
+        <div style="text-align:center;flex:1;">
+          <div style="font-family:'Cinzel',serif;font-size:22px;font-weight:900;color:var(--gold);" id="level-display">1</div>
+          <div style="font-size:11px;color:var(--text-muted);">Antas</div>
+        </div>
+        <div style="width:1px;background:rgba(244,168,0,0.15);"></div>
+        <div style="text-align:center;flex:1;">
+          <div style="font-family:'Cinzel',serif;font-size:22px;font-weight:900;color:var(--gold);" id="badges-count">0</div>
+          <div style="font-size:11px;color:var(--text-muted);">Badges</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Mga Badge</div>
+    <div class="card">
+      <div class="badge-row">
+        <div class="badge">
+          <div class="badge-icon locked" id="badge-1">🔍</div>
+          <div class="badge-name">Tagasaliksik</div>
+          <div style="font-size:9px;color:var(--text-dim);">500 XP</div>
+        </div>
+        <div class="badge">
+          <div class="badge-icon locked" id="badge-2">📊</div>
+          <div class="badge-name">Tagapanuri</div>
+          <div style="font-size:9px;color:var(--text-dim);">1000 XP</div>
+        </div>
+        <div class="badge">
+          <div class="badge-icon locked" id="badge-3">🤝</div>
+          <div class="badge-name">Tagapaglahok</div>
+          <div style="font-size:9px;color:var(--text-dim);">1500 XP</div>
+        </div>
+        <div class="badge">
+          <div class="badge-icon locked" id="badge-4">🌟</div>
+          <div class="badge-name">Tagapaglingkod</div>
+          <div style="font-size:9px;color:var(--text-dim);">2000 XP</div>
+        </div>
+        <div class="badge">
+          <div class="badge-icon locked" id="badge-5">⚔️</div>
+          <div class="badge-name">Bayani</div>
+          <div style="font-size:9px;color:var(--text-dim);">2500 XP</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px;">Settings</div>
+    <div class="settings-item"><span class="s-icon">🔒</span> Privacy at Data</div>
+    <div class="settings-item"><span class="s-icon">⬇️</span> I-download ang aking data</div>
+    <div class="settings-item danger"><span class="s-icon">🗑️</span> I-delete ang aking account</div>
+    <div class="settings-item danger" onclick="logout()"><span class="s-icon">🚪</span> Mag-logout</div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottomnav">
+    <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+      <span class="nav-icon">🏠</span>Home
+    </button>
+    <button class="nav-btn" id="nav-map" onclick="switchTab('map')">
+      <span class="nav-icon">🗺️</span>Mapa
+    </button>
+    <button class="nav-btn" id="nav-journal" onclick="switchTab('journal')">
+      <span class="nav-icon">📖</span>Journal
+    </button>
+    <button class="nav-btn" id="nav-profile" onclick="switchTab('profile')">
+      <span class="nav-icon">👤</span>Profile
+    </button>
+  </nav>
+</div>
+
+<!-- ═══════════════════════════════════
+     SCREEN: MISSION
+════════════════════════════════════ -->
+<div id="screen-mission" class="screen">
+  <div class="mission-header">
+    <button class="back-btn" onclick="goBack()">← Bumalik</button>
+    <div style="margin-top:10px;">
+      <div class="mission-tag" id="mission-tag">Tuklasin</div>
+      <div class="mission-title-big" id="mission-title-big">Mission Title</div>
+    </div>
+  </div>
+
+  <div class="content" id="mission-content-area">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SCREEN: TEACHER DASHBOARD
+════════════════════════════════════ -->
+<div id="screen-teacher" class="screen">
+  <!-- Teacher Home -->
+  <div id="teacher-view-home">
+    <div class="teacher-header">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#5D9EC4;text-transform:uppercase;letter-spacing:1px;">Dashboard ng Guro</div>
+        <div class="teacher-title" id="teacher-name-display">G. Santos</div>
+      </div>
+      <button class="btn btn-sm btn-outline" style="border-color:rgba(231,76,60,0.4);color:#E74C3C;font-family:Nunito,sans-serif;" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="teacher-content">
+      <div class="code-box">
+        <div class="code-label">Class Code ng Inyong Klase</div>
+        <div class="class-code">BQ-4821</div>
+        <div style="font-size:12px;color:#5D9EC4;margin-top:8px;">Ibigay ito sa inyong mga estudyante</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Mga Estudyante</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">12</div>
+          <div class="stat-label">Missions Tapos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Active Ngayon</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">68%</div>
+          <div class="stat-label">Avg. Progress</div>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#5D9EC4;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Listahan ng Estudyante</div>
+
+      <div class="student-row" onclick="viewStudentJournal('Maria Santos')">
+        <div class="student-avatar">M</div>
+        <div class="student-info">
+          <div class="student-name">Maria Santos</div>
+          <div class="student-meta">350 XP · 4 missions tapos</div>
+        </div>
+        <div>
+          <div class="progress-mini"><div class="progress-mini-fill" style="width:70%"></div></div>
+          <div style="font-size:10px;color:#5D9EC4;text-align:right;margin-top:3px;">70%</div>
+        </div>
+      </div>
+
+      <div class="student-row" onclick="viewStudentJournal('Jose Reyes')">
+        <div class="student-avatar">J</div>
+        <div class="student-info">
+          <div class="student-name">Jose Reyes</div>
+          <div class="student-meta">200 XP · 2 missions tapos</div>
+        </div>
+        <div>
+          <div class="progress-mini"><div class="progress-mini-fill" style="width:40%"></div></div>
+          <div style="font-size:10px;color:#5D9EC4;text-align:right;margin-top:3px;">40%</div>
+        </div>
+      </div>
+
+      <div class="student-row" onclick="viewStudentJournal('Ana Garcia')">
+        <div class="student-avatar">A</div>
+        <div class="student-info">
+          <div class="student-name">Ana Garcia</div>
+          <div class="student-meta">500 XP · 6 missions tapos</div>
+        </div>
+        <div>
+          <div class="progress-mini"><div class="progress-mini-fill" style="width:100%"></div></div>
+          <div style="font-size:10px;color:#5D9EC4;text-align:right;margin-top:3px;">100%</div>
+        </div>
+      </div>
+
+      <div class="student-row" onclick="viewStudentJournal('Pedro Lim')">
+        <div class="student-avatar">P</div>
+        <div class="student-info">
+          <div class="student-name">Pedro Lim</div>
+          <div class="student-meta">150 XP · 1 mission tapos</div>
+        </div>
+        <div>
+          <div class="progress-mini"><div class="progress-mini-fill" style="width:30%"></div></div>
+          <div style="font-size:10px;color:#5D9EC4;text-align:right;margin-top:3px;">30%</div>
+        </div>
+      </div>
+
+      <div class="student-row" onclick="viewStudentJournal('Lea Cruz')">
+        <div class="student-avatar">L</div>
+        <div class="student-info">
+          <div class="student-name">Lea Cruz</div>
+          <div class="student-meta">80 XP · 0 missions tapos</div>
+        </div>
+        <div>
+          <div class="progress-mini"><div class="progress-mini-fill" style="width:16%"></div></div>
+          <div style="font-size:10px;color:#5D9EC4;text-align:right;margin-top:3px;">16%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher: Student Journal View -->
+  <div id="teacher-view-journal" style="display:none;flex-direction:column;min-height:100vh;">
+    <div class="teacher-header">
+      <button class="back-btn" style="color:#5D9EC4;" onclick="closeStudentJournal()">← Bumalik</button>
+    </div>
+    <div class="teacher-content" style="flex:1;">
+      <div class="student-journal-header" id="journal-student-name">Journal ni Maria Santos</div>
+
+      <div class="journal-entry">
+        <div class="journal-entry-title">Mission 1 — Tuklasin: Ang Sinaunang Kabihasnan</div>
+        <div class="journal-entry-text">Ang sinaunang kabihasnan ng Mesopotamia ay nagpakita ng kahalagahan ng tubig sa pagpapaunlad ng lipunan. Natutunan ko na ang mga tao noon ay matalino dahil nagtatayo sila ng mga sistema ng irigasyon...</div>
+        <div class="journal-entry-meta">✅ Nakumpleto · Q1 Mission 1 · 100 XP</div>
+      </div>
+
+      <div class="journal-entry">
+        <div class="journal-entry-title">Mission 2 — Suriin: Kalakalan sa Sinaunang Asya</div>
+        <div class="journal-entry-text">Sa aking pagsusuri ng dalawang uri ng kalakalan — ang barter at ang paggamit ng pera — natuklasan ko na ang mas organisadong sistema ay nagdulot ng mas malakas na ekonomiya...</div>
+        <div class="journal-entry-meta">✅ Nakumpleto · Q1 Mission 2 · 100 XP</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SUCCESS OVERLAY
+════════════════════════════════════ -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-card">
+    <div class="success-emoji">🎉</div>
+    <div class="success-title">Mission Kumpleto!</div>
+    <div style="font-size:14px;color:var(--text-muted);">Na-save na sa iyong journal</div>
+    <div class="success-xp" id="success-xp-amount">+100 XP</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:20px;" id="success-msg">Mahusay! Patuloy ka lang, Tagasaliksik!</div>
+    <button class="btn btn-gold btn-full" onclick="closeSuccess()">Magpatuloy →</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════
+let state = {
+  studentName: 'Juan dela Cruz',
+  classCode: '',
+  xp: 50,
+  missionsCompleted: [1],
+  currentMission: null,
+  currentQuarter: 'Q1',
+  journalEntries: [],
+  currentTab: 'home',
+  role: 'student'
+};
+
+// ═══════════════════════════════════
+// MISSION DATA
+// ═══════════════════════════════════
+const MISSIONS = {
+  Q1: [
+    { id:1, type:'Tuklasin', title:'Ang Sinaunang Kabihasnan ng Mesopotamia', xp:100,
+      scenario:'Isang grupo ng mga arkeologo ang natuklasan ang mga labi ng sinaunang lungsod sa Iraq. Nakita nila ang mga istruktura ng irigasyon, mga tablet na may sulat, at mga tanda ng organisadong pamahalaan.',
+      questions:['Bakit mahalaga ang tubig sa pagpapaunlad ng sinaunang kabihasnan?','Ano ang kaibahan ng buhay ng mga tao sa sinaunang Mesopotamia kumpara sa ating buhay ngayon?','Kung ikaw ang isang arkeolgo, anong katibayan pa ang hinahanap mo?'],
+      interactionType:'reflection' },
+    { id:2, type:'Suriin', title:'Kalakalan sa Sinaunang Asya: Barter vs Pera', xp:100,
+      scenario:'Dalawang sistema ng kalakalan ang ginamit sa sinaunang Asya: ang barter (palitan ng gamit) at ang paggamit ng pera (ginto, pilak). Ang bawat sistema ay may kalamangan at kahinaan.',
+      questions:null,
+      interactionType:'sort',
+      sortData: {
+        items: ['Nangangailangan ng tiwala','Madaling gamitin kahit saan','Limitado ang palitan','Mas maraming pagkakataon','Kailangan ng parehong gusto','Pantay na halaga'],
+        col1: 'Barter', col2: 'Paggamit ng Pera',
+        answers: { 'Nangangailangan ng tiwala':'Barter','Madaling gamitin kahit saan':'Paggamit ng Pera','Limitado ang palitan':'Barter','Mas maraming pagkakataon':'Paggamit ng Pera','Kailangan ng parehong gusto':'Barter','Pantay na halaga':'Paggamit ng Pera' }
+      }
+    },
+    { id:3, type:'Gawin', title:'Gawa ang isang Liham: Ikaw ay isang Mangangalakal sa Silk Road', xp:100,
+      scenario:'Ika-8 siglo. Ikaw ay isang mangangalakal mula sa Pilipinas na naglalakbay sa Silk Road. Sumulat ng isang maikling liham sa iyong pamilya tungkol sa iyong paglalakbay.',
+      questions:['Saan ka naroroon ngayon at ano ang nakita mo?','Anong kalakal ang iyong dala at para saan?','Ano ang iyong damdamin bilang isang Pilipinong mangangalakal sa ibang lupain?'],
+      interactionType:'reflection' },
+    { id:4, type:'Timeline', title:'Pagkakasunod ng mga Sinaunang Kabihasnan', xp:100,
+      scenario:'Ilagay ang mga sumusunod na kaganapan sa tamang pagkakasunod batay sa kasaysayan.',
+      questions:null,
+      interactionType:'timeline',
+      timelineData: {
+        items: ['Nastabilidad ang Ehipto bilang imperyo (~3100 BCE)','Nabuo ang Mesopotamia sa pagitan ng Tigris at Euphrates (~4000 BCE)','Umabot ang Silk Road sa Asya (~130 BCE)','Nagsimula ang Indus Valley Civilization (~2500 BCE)'],
+        correct: ['Nabuo ang Mesopotamia sa pagitan ng Tigris at Euphrates (~4000 BCE)','Nastabilidad ang Ehipto bilang imperyo (~3100 BCE)','Nagsimula ang Indus Valley Civilization (~2500 BCE)','Umabot ang Silk Road sa Asya (~130 BCE)']
+      }
+    },
+    { id:5, type:'Ipagtanggol', title:'Debate: Mas Mahalaga ba ang Heograpiya o ang Kultura?', xp:100,
+      scenario:'May argumento sa klase: ang ilan ay nagsasabi na ang heograpiya (lokasyon, klima, lupa) ang pangunahing dahilan ng tagumpay ng isang kabihasnan. Ang iba naman ay nagsasabi na ang kultura at mga tao ang mas mahalaga.',
+      questions:['Alin sa dalawang argumento ang iyong sinasang-ayunan? Bakit?','Magbigay ng tatlong patunay mula sa kasaysayan upang suportahan ang iyong posisyon.','Paano mo sasagutin ang argumento ng kabilang panig?'],
+      interactionType:'reflection' },
+    { id:6, type:'Maging Sila', title:'Ikaw si Lapu-Lapu: Ang Desisyon', xp:100,
+      scenario:'Abril 27, 1521. Ikaw si Lapu-Lapu, pinuno ng Mactan. Nalaman mo na si Ferdinand Magellan at ang kanyang mga sundalong Espanyol ay paparating. Ang ibang datu ay sumusuko na sa kanila. Kailangan mong magdesisyon.',
+      questions:['Bilang si Lapu-Lapu, ano ang iyong gagawin at bakit?','Anong mga kadahilanan ang iyong isinasaalang-alang sa iyong desisyon?','Ano sa tingin mo ang magiging epekto ng iyong desisyon sa kinabukasan ng Mactan?'],
+      interactionType:'reflection' },
+    { id:7, type:'Tuklasin', title:'Ang Sinaunang Pilipinas: Bago Dumating ang mga Kastila', xp:100,
+      scenario:'Sa pamamagitan ng mga arkeolohikal na natuklasan at mga oral na kasaysayan, nalaman natin na ang sinaunang Pilipinas ay may sariling kultura, pamahalaan, at kalakalan bago pa dumating ang mga Europeo.',
+      questions:['Ano-anong ebidensya ang nagpapatunay na may sariling sibilisasyon ang Pilipinas bago ang kolonyalismo?','Paano naging posible ang kalakalan sa pagitan ng mga isla nang walang modernong teknolohiya?','Bakit mahalaga ang pag-aaral ng pre-colonial Philippines?'],
+      interactionType:'reflection' },
+    { id:8, type:'Suriin', title:'Heograpiya ng Timog-Silangang Asya', xp:100,
+      scenario:'Ang Timog-Silangang Asya ay binubuo ng maraming isla, likas na yaman, at estratehikong lokasyon sa pagitan ng mga karagatan.',
+      questions:null,
+      interactionType:'connect',
+      connectData: {
+        left: ['Maraming isla','Monsoon season','Mayamang lupa','Gitna ng karagatan'],
+        right: ['Nag-uugnay ng kalakalan','Nagbibigay ng sakahan','Nagbibigay ng biodiversity','Nagbibigay ng tag-ulan at tag-araw'],
+        pairs: {0:3, 1:3, 2:1, 3:0}
+      }
+    },
+    { id:9, type:'Gawin', title:'Gumawa ng Community Map ng Inyong Lugar', xp:100,
+      scenario:'Bilang isang Tagasaliksik, gawin ang isang deskripsiyon ng iyong komunidad — ano ang mga likas na yaman, ang kasaysayan, at ang mga suliranin na naroroon.',
+      questions:['Ilarawan ang heograpiya ng inyong komunidad (bundok, ilog, dagat, atbp.)','Ano ang mga likas na yaman ng inyong lugar at paano ito ginagamit?','Ano ang isang suliranin sa inyong komunidad na may kaugnayan sa heograpiya?'],
+      interactionType:'reflection' },
+    { id:10, type:'Ipagtanggol', title:'Dapat ba Pangalagaan ang mga Katutubong Kultura?', xp:100,
+      scenario:'Sa modernong panahon, maraming katutubong kultura ang nawawala dahil sa globalisasyon at modernisasyon. Ang ilan ay nagsasabi na kailangan itong protektahan; ang iba naman ay nagsasabi na natural lang ang pagbabago.',
+      questions:['Ano ang iyong posisyon? Dapat ba nating pangalagaan ang mga katutubong kultura?','Magbigay ng tatlong halimbawa ng mga kulturang nanganganib ngayon.','Paano mo gagawin ang pagpapanatili ng kultura nang hindi pinipigilan ang pag-unlad?'],
+      interactionType:'reflection' },
+    { id:11, type:'Timeline', title:'Mahahalagang Pangyayari sa Kasaysayan ng Pilipinas', xp:100,
+      scenario:'Ilagay ang mga sumusunod na mahalagang pangyayari sa tamang pagkakasunod sa kasaysayan ng Pilipinas.',
+      questions:null,
+      interactionType:'timeline',
+      timelineData: {
+        items: ['Proklamasyon ng Kalayaan ng Pilipinas (1946)','Pagdating ni Magellan sa Pilipinas (1521)','Rebolusyong Pilipino laban sa Espanya (1896)','Amerikano ang bagong kolonyalista ng Pilipinas (1898)'],
+        correct: ['Pagdating ni Magellan sa Pilipinas (1521)','Rebolusyong Pilipino laban sa Espanya (1896)','Amerikano ang bagong kolonyalista ng Pilipinas (1898)','Proklamasyon ng Kalayaan ng Pilipinas (1946)']
+      }
+    },
+    { id:12, type:'Maging Sila', title:'Ikaw si Jose Rizal: Ang Liham sa Iyong Bayan', xp:100,
+      scenario:'Disyembre 29, 1896. Bukas na ang iyong pagpapatupad. Bilang si Jose Rizal, ang pambansang bayani ng Pilipinas, mayroon kang pagkakataon na magsulat ng isang huling liham sa iyong bayan.',
+      questions:['Bilang si Rizal, ano ang iyong sasabihin sa mga Pilipino?','Ano ang iyong pangarap para sa Pilipinas?','Paano mo ipaliliwanag ang iyong mga ginawa at sakripisyo?'],
+      interactionType:'reflection' }
+  ],
+  Q2: Array.from({length:12},(_,i)=>({ id:i+1, type:['Tuklasin','Suriin','Gawin','Ipagtanggol','Maging Sila','Timeline'][i%6], title:`Q2 Mission ${i+1}`, xp:100, scenario:'Coming soon — Q2 content', questions:['Tanong 1','Tanong 2','Tanong 3'], interactionType:'reflection' })),
+  Q3: Array.from({length:12},(_,i)=>({ id:i+1, type:['Tuklasin','Suriin','Gawin','Ipagtanggol','Maging Sila','Timeline'][i%6], title:`Q3 Mission ${i+1}`, xp:100, scenario:'Coming soon — Q3 content', questions:['Tanong 1','Tanong 2','Tanong 3'], interactionType:'reflection' })),
+  Q4: Array.from({length:12},(_,i)=>({ id:i+1, type:['Tuklasin','Suriin','Gawin','Ipagtanggol','Maging Sila','Timeline'][i%6], title:`Q4 Mission ${i+1}`, xp:100, scenario:'Coming soon — Q4 content', questions:['Tanong 1','Tanong 2','Tanong 3'], interactionType:'reflection' }))
+};
+
+const TYPE_ICONS = { Tuklasin:'🔍', Suriin:'📊', Gawin:'✏️', Ipagtanggol:'⚔️', 'Maging Sila':'🎭', Timeline:'📅' };
+
+// ═══════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════
+function setRole(role) {
+  state.role = role;
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('student-login').style.display = role === 'student' ? 'block' : 'none';
+  document.getElementById('teacher-login').style.display = role === 'teacher' ? 'block' : 'none';
+}
+
+function toggleClassCode(cb) {
+  document.getElementById('class-code').disabled = cb.checked;
+  if (cb.checked) document.getElementById('class-code').value = '';
+}
+
+function loginStudent() {
+  const name = document.getElementById('student-name').value.trim() || 'Estudyante';
+  const code = document.getElementById('class-code').value.trim();
+  state.studentName = name;
+  state.classCode = code || 'Walang Code';
+  document.getElementById('profile-name-display').textContent = name;
+  document.getElementById('profile-initial').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('profile-class-display').textContent = 'Grade 8 · ' + (code || 'Walang Code');
+  showScreen('screen-student');
+  renderMissionGrid('Q1');
+  renderMap();
+}
+
+function loginTeacher() {
+  const name = document.getElementById('teacher-name').value.trim() || 'Guro';
+  document.getElementById('teacher-name-display').textContent = name;
+  showScreen('screen-teacher');
+}
+
+// ═══════════════════════════════════
+// SCREEN NAV
+// ═══════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).style.display = '';
+  document.getElementById(id).classList.add('active');
+}
+
+function logout() {
+  showScreen('screen-login');
+}
+
+function goBack() {
+  showScreen('screen-student');
+}
+
+// ═══════════════════════════════════
+// TABS
+// ═══════════════════════════════════
+function switchTab(tab) {
+  ['home','map','journal','profile'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('nav-'+t).classList.toggle('active', t === tab);
+  });
+  state.currentTab = tab;
+  if (tab === 'journal') renderJournal();
+  if (tab === 'profile') updateProfile();
+}
+
+// ═══════════════════════════════════
+// MISSION GRID
+// ═══════════════════════════════════
+function selectQuarter(q, el) {
+  state.currentQuarter = q;
+  document.querySelectorAll('.quarter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('mission-quarter-label').textContent = q + ' — Mga Mission';
+  renderMissionGrid(q);
+}
+
+function renderMissionGrid(q) {
+  const missions = MISSIONS[q];
+  const grid = document.getElementById('mission-grid');
+  const completed = state.missionsCompleted;
+  const maxUnlocked = Math.max(...completed) + 1;
+  grid.innerHTML = missions.map(m => {
+    const isCompleted = completed.includes(m.id) && q === 'Q1';
+    const isAvailable = m.id === maxUnlocked && q === 'Q1';
+    const isLocked = !isCompleted && !isAvailable;
+    let cls = isCompleted ? 'completed' : isAvailable ? 'available' : 'locked';
+    return `<div class="mission-tile ${cls}" onclick="${isLocked ? '' : `openMission(${m.id},'${q}')`}">
+      ${isLocked
+        ? `<div class="lock-icon">🔒</div><div class="mission-type-tag" style="font-size:9px;">${m.id}</div>`
+        : `<div class="mission-num">${isCompleted ? '✓' : m.id}</div>
+           <div class="mission-type-tag">${TYPE_ICONS[m.type] || ''} ${m.type}</div>`
+      }
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════
+// MAP
+// ═══════════════════════════════════
+function renderMap() {
+  const list = document.getElementById('map-list');
+  const q1 = MISSIONS['Q1'];
+  const completed = state.missionsCompleted;
+  const maxUnlocked = Math.max(...completed) + 1;
+  list.innerHTML = q1.map(m => {
+    const isCompleted = completed.includes(m.id);
+    const isAvailable = m.id === maxUnlocked;
+    const status = isCompleted ? 'done' : isAvailable ? 'open' : 'lock';
+    const statusText = isCompleted ? '✓ Tapos' : isAvailable ? 'Bukas' : '🔒';
+    return `<div class="map-item" onclick="${status==='lock' ? '' : `openMission(${m.id},'Q1')`}" style="${status==='lock'?'opacity:0.5;cursor:not-allowed;':''}">
+      <div class="map-item-num">${TYPE_ICONS[m.type]||m.id}</div>
+      <div class="map-item-info">
+        <div class="map-item-title">${m.title}</div>
+        <div class="map-item-meta">Q1 · ${m.type} · ${m.xp} XP</div>
+      </div>
+      <div class="map-item-status ${status}">${statusText}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════
+// OPEN MISSION
+// ═══════════════════════════════════
+function openMission(id, q) {
+  const m = MISSIONS[q].find(x => x.id === id);
+  if (!m) return;
+  state.currentMission = { ...m, quarter: q };
+  document.getElementById('mission-tag').textContent = `${TYPE_ICONS[m.type]||''} ${m.type} · ${q} Mission ${m.id}`;
+  document.getElementById('mission-title-big').textContent = m.title;
+  const area = document.getElementById('mission-content-area');
+  area.innerHTML = renderMissionContent(m);
+  initInteractions(m);
+  showScreen('screen-mission');
+}
+
+function renderMissionContent(m) {
+  let html = `<div class="card" style="margin-bottom:14px;">
+    <div class="question-label">📜 Sitwasyon</div>
+    <div class="scenario-box">${m.scenario}</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span class="pill">+${m.xp} XP</span>
+      <span style="font-size:12px;color:var(--text-dim);">I-kumpleto para ma-unlock ang susunod</span>
+    </div>
+  </div>`;
+
+  if (m.interactionType === 'reflection') {
+    html += `<div class="card">
+      <div class="question-label">✍️ Iyong Mga Sagot</div>`;
+    m.questions.forEach((q,i) => {
+      html += `<div style="margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;">${i+1}. ${q}</div>
+        <textarea class="journal-textarea" id="ans-${i}" placeholder="Isulat ang iyong sagot dito..." rows="3"></textarea>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (m.interactionType === 'sort') {
+    const d = m.sortData;
+    html += `<div class="card">
+      <div class="question-label">🃏 I-Sort ang mga Card</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">I-drag ang bawat card sa tamang kolumna.</div>
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px;">Mga Card:</div>
+      <div class="sort-bank" id="sort-bank">
+        ${d.items.map(item=>`<div class="sort-card-item" draggable="true" data-item="${item}" ondragstart="dragStart(event)">${item}</div>`).join('')}
+      </div>
+      <div class="sort-columns">
+        <div>
+          <div class="sort-col-label">${d.col1}</div>
+          <div class="sort-col" id="col-0" ondragover="dragOver(event)" ondrop="dropCard(event,'${d.col1}')"></div>
+        </div>
+        <div>
+          <div class="sort-col-label">${d.col2}</div>
+          <div class="sort-col" id="col-1" ondragover="dragOver(event)" ondrop="dropCard(event,'${d.col2}')"></div>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-outline" onclick="checkSort()">Suriin ang Sagot →</button>
+      <div id="sort-result" style="margin-top:10px;font-size:13px;font-weight:700;"></div>
+    </div>`;
+  }
+
+  if (m.interactionType === 'timeline') {
+    const d = m.timelineData;
+    const shuffled = [...d.items].sort(() => Math.random() - 0.5);
+    html += `<div class="card">
+      <div class="question-label">📅 I-Ayos ang Timeline</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">I-drag ang mga pangyayari sa tamang pagkakasunod.</div>
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px;">Mga Pangyayari:</div>
+      <div class="sort-bank" id="timeline-bank">
+        ${shuffled.map(item=>`<div class="sort-card-item" draggable="true" data-item="${item}" ondragstart="dragStart(event)" style="font-size:12px;">${item}</div>`).join('')}
+      </div>
+      <div class="timeline-slots" id="timeline-slots">
+        ${d.correct.map((_,i)=>`
+        <div class="timeline-slot">
+          <div class="timeline-num">${i+1}</div>
+          <div class="timeline-drop-zone" id="tslot-${i}" ondragover="dragOver(event)" ondrop="dropTimeline(event,${i})">i-drop dito…</div>
+        </div>`).join('')}
+      </div>
+      <button class="btn btn-sm btn-outline" onclick="checkTimeline()">Suriin ang Sagot →</button>
+      <div id="timeline-result" style="margin-top:10px;font-size:13px;font-weight:700;"></div>
+    </div>`;
+  }
+
+  if (m.interactionType === 'connect') {
+    const d = m.connectData;
+    html += `<div class="card">
+      <div class="question-label">🔗 I-Connect ang mga Pares</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">I-tap ang isang item sa kaliwa, pagkatapos ang tamang pares sa kanan.</div>
+      <div class="connect-pairs">
+        <div class="connect-col">
+          ${d.left.map((item,i)=>`<div class="connect-item" id="left-${i}" onclick="selectLeft(${i})">${item}</div>`).join('')}
+        </div>
+        <div class="connect-col">
+          ${d.right.map((item,i)=>`<div class="connect-item" id="right-${i}" onclick="selectRight(${i})">${item}</div>`).join('')}
+        </div>
+      </div>
+      <button class="btn btn-sm btn-outline" onclick="checkConnect()">Suriin ang Sagot →</button>
+      <div id="connect-result" style="margin-top:10px;font-size:13px;font-weight:700;"></div>
+    </div>`;
+  }
+
+  html += `<div style="margin-top:8px;">
+    <button class="btn btn-gold btn-full" onclick="submitMission()">✅ I-Submit ang Mission</button>
+  </div>`;
+
+  return html;
+}
+
+// ═══════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════
+let dragItem = null;
+
+function dragStart(e) {
+  dragItem = e.target;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function dragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function dropCard(e, colName) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!dragItem) return;
+  const clone = dragItem.cloneNode(true);
+  clone.ondragstart = e => { dragItem = e.target; e.dataTransfer.effectAllowed = 'move'; };
+  e.currentTarget.appendChild(clone);
+  dragItem.remove();
+  dragItem = null;
+}
+
+function dropTimeline(e, slotIdx) {
+  e.preventDefault();
+  const zone = document.getElementById('tslot-'+slotIdx);
+  zone.classList.remove('drag-over');
+  if (!dragItem) return;
+  const existing = zone.querySelector('.sort-card-item');
+  if (existing) document.getElementById('timeline-bank').appendChild(existing);
+  zone.innerHTML = '';
+  const clone = dragItem.cloneNode(true);
+  clone.style.margin = '0'; clone.style.fontSize = '12px';
+  clone.draggable = true;
+  clone.ondragstart = e => { dragItem = e.target; e.dataTransfer.effectAllowed = 'move'; };
+  zone.appendChild(clone);
+  zone.classList.add('filled');
+  dragItem.remove();
+  dragItem = null;
+}
+
+function checkSort() {
+  const m = state.currentMission;
+  const d = m.sortData;
+  let correct = 0, total = Object.keys(d.answers).length;
+  ['col-0','col-1'].forEach(colId => {
+    const col = document.getElementById(colId);
+    const colName = colId === 'col-0' ? d.col1 : d.col2;
+    col.querySelectorAll('.sort-card-item').forEach(el => {
+      if (d.answers[el.dataset.item] === colName) {
+        el.style.borderColor = 'var(--green)'; el.style.background = 'rgba(39,174,96,0.1)';
+        correct++;
+      } else {
+        el.style.borderColor = 'var(--red)'; el.style.background = 'rgba(192,57,43,0.1)';
+      }
+    });
+  });
+  const res = document.getElementById('sort-result');
+  res.style.color = correct===total ? 'var(--green)' : 'var(--gold)';
+  res.textContent = correct===total ? `✅ Tama lahat! ${correct}/${total}` : `${correct}/${total} tama — subukan muli!`;
+}
+
+function checkTimeline() {
+  const m = state.currentMission;
+  const correct = m.timelineData.correct;
+  let score = 0;
+  correct.forEach((c,i) => {
+    const zone = document.getElementById('tslot-'+i);
+    const item = zone.querySelector('.sort-card-item');
+    if (item && item.dataset.item === c) {
+      zone.style.borderColor = 'var(--green)'; score++;
+    } else {
+      zone.style.borderColor = 'var(--red)';
+    }
+  });
+  const res = document.getElementById('timeline-result');
+  res.style.color = score===correct.length ? 'var(--green)' : 'var(--gold)';
+  res.textContent = score===correct.length ? `✅ Perpekto! Tamang pagkakasunod!` : `${score}/${correct.length} tama — ayusin pa!`;
+}
+
+let selectedLeft = null, connectMatches = {};
+function selectLeft(i) {
+  document.querySelectorAll('.connect-item[id^="left-"]').forEach(el => el.classList.remove('selected'));
+  if (!document.getElementById('left-'+i).classList.contains('matched')) {
+    document.getElementById('left-'+i).classList.add('selected');
+    selectedLeft = i;
+  }
+}
+
+function selectRight(i) {
+  if (selectedLeft === null) { showToast('Pumili muna sa kaliwa'); return; }
+  const m = state.currentMission.connectData;
+  connectMatches[selectedLeft] = i;
+  document.getElementById('left-'+selectedLeft).classList.remove('selected');
+  document.getElementById('left-'+selectedLeft).classList.add('matched');
+  document.getElementById('right-'+i).classList.add('matched');
+  selectedLeft = null;
+}
+
+function checkConnect() {
+  const m = state.currentMission.connectData;
+  let correct = 0;
+  Object.entries(connectMatches).forEach(([l,r]) => {
+    const isCorrect = m.pairs[l] == r;
+    document.getElementById('left-'+l).style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
+    document.getElementById('right-'+r).style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
+    if (isCorrect) correct++;
+  });
+  const res = document.getElementById('connect-result');
+  res.style.color = correct===Object.keys(m.pairs).length ? 'var(--green)' : 'var(--gold)';
+  res.textContent = correct===Object.keys(m.pairs).length ? '✅ Tama lahat ang mga pares!' : `${correct}/${Object.keys(m.pairs).length} tama`;
+}
+
+function initInteractions(m) { selectedLeft = null; connectMatches = {}; }
+
+// ═══════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════
+function submitMission() {
+  const m = state.currentMission;
+  let answers = [];
+  if (m.interactionType === 'reflection') {
+    answers = (m.questions || []).map((_,i) => document.getElementById('ans-'+i)?.value || '');
+    const hasAnswer = answers.some(a => a.trim().length > 3);
+    if (!hasAnswer) { showToast('Sumulat muna ng sagot!'); return; }
+  }
+
+  // Save journal entry
+  if (m.quarter === 'Q1') {
+    state.journalEntries.push({
+      missionTitle: `Mission ${m.id} — ${m.type}: ${m.title}`,
+      answers,
+      xp: m.xp,
+      quarter: m.quarter,
+      id: m.id
+    });
+    if (!state.missionsCompleted.includes(m.id)) {
+      state.missionsCompleted.push(m.id);
+    }
+    state.xp += m.xp;
+    document.getElementById('xp-display').textContent = state.xp + ' XP';
+  }
+
+  // Show success
+  document.getElementById('success-xp-amount').textContent = '+' + m.xp + ' XP';
+  const msgs = ['Mahusay na trabaho, Tagasaliksik!','Patuloy kang lumago!','Ang kahusayan mo ay kapuri-puri!','Isang hakbang na mas malapit sa pagiging Bayani!'];
+  document.getElementById('success-msg').textContent = msgs[Math.floor(Math.random()*msgs.length)];
+  document.getElementById('success-overlay').classList.add('show');
+}
+
+function closeSuccess() {
+  document.getElementById('success-overlay').classList.remove('show');
+  renderMissionGrid(state.currentQuarter);
+  renderMap();
+  updateProfile();
+  showScreen('screen-student');
+  switchTab('home');
+}
+
+// ═══════════════════════════════════
+// JOURNAL
+// ═══════════════════════════════════
+function renderJournal() {
+  const list = document.getElementById('journal-list');
+  if (state.journalEntries.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-dim);">
+      <div style="font-size:32px;margin-bottom:12px;">📖</div>
+      <div>Wala pang naka-save na entry. Kumpletuhin ang isang mission!</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = state.journalEntries.map(e => `
+    <div class="journal-entry">
+      <div class="journal-entry-title">${e.missionTitle}</div>
+      ${e.answers && e.answers.length > 0
+        ? e.answers.filter(a=>a.trim()).map((a,i)=>`<div class="journal-entry-text" style="margin-bottom:6px;"><strong style="color:var(--gold-dark);">Tanong ${i+1}:</strong> ${a}</div>`).join('')
+        : '<div class="journal-entry-text">Nakumpleto.</div>'}
+      <div class="journal-entry-meta">✅ Nakumpleto · ${e.quarter} Mission ${e.id} · +${e.xp} XP</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════
+// PROFILE UPDATE
+// ═══════════════════════════════════
+function updateProfile() {
+  document.getElementById('profile-xp').textContent = state.xp + ' XP';
+  document.getElementById('profile-xp-bar').style.width = Math.min(100, (state.xp/2500)*100) + '%';
+  document.getElementById('missions-count').textContent = state.journalEntries.length;
+  const level = Math.floor(state.xp / 500) + 1;
+  document.getElementById('level-display').textContent = level;
+  const thresholds = [500,1000,1500,2000,2500];
+  let earnedBadges = 0;
+  thresholds.forEach((t,i) => {
+    const b = document.getElementById('badge-'+(i+1));
+    if (state.xp >= t) { b.classList.remove('locked'); b.classList.add('earned'); earnedBadges++; }
+    else { b.classList.add('locked'); b.classList.remove('earned'); }
+  });
+  document.getElementById('badges-count').textContent = earnedBadges;
+}
+
+// ═══════════════════════════════════
+// TEACHER
+// ═══════════════════════════════════
+function viewStudentJournal(name) {
+  document.getElementById('journal-student-name').textContent = 'Journal ni ' + name;
+  document.getElementById('teacher-view-home').style.display = 'none';
+  document.getElementById('teacher-view-journal').style.display = 'flex';
+}
+
+function closeStudentJournal() {
+  document.getElementById('teacher-view-home').style.display = 'block';
+  document.getElementById('teacher-view-journal').style.display = 'none';
+}
+
+// ═══════════════════════════════════
+// TOAST
+// ═══════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+renderMissionGrid('Q1');
+renderMap();
+</script>
+</body>
+</html>
